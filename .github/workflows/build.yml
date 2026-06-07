@@ -22,6 +22,11 @@ jobs:
         mv "$TARGET"/* .
         rm -rf temp_extract target_dir.txt *.zip
 
+    - name: Fix Code Redundancies
+      run: |
+        # This prevents the duplicated header inclusion that crashed run #8
+        find . -name "*.cpp" -o -name "*.h" | xargs sed -i '' '/particle_nodes\/firePngData.h/d' || true
+
     - name: Build Mod File
       uses: geode-sdk/build-geode-mod@main
       with:
