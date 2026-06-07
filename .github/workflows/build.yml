@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
 
     steps:
     - name: Checkout Code
@@ -26,4 +26,3 @@ jobs:
       uses: geode-sdk/build-geode-mod@main
       with:
         target: iOS
-        sdk: macos-14
