@@ -13,17 +13,16 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Unzip Mod Files
+    - name: Clean Environment and Extract Files
       run: |
-        unzip "MultiplayerEditor-main.zip" -d temp_folder
-        if [ -d "temp_folder/MultiplayerEditor-main" ]; then
-          mv temp_folder/MultiplayerEditor-main/* .
-        elif [ -d "temp_folder/MultiplayerEditor" ]; then
-          mv temp_folder/MultiplayerEditor/* .
-        else
-          mv temp_folder/* .
-        fi
-        rm -rf temp_folder "MultiplayerEditor-main.zip"
+        mkdir temp_extract
+        unzip -q *.zip -d temp_extract
+        find temp_extract -name "mod.json" -exec dirname {} \; | head -n 1 > target_dir.txt
+        TARGET=$(cat target_dir.txt)
+        mv "$TARGET"/* .
+        rm -rf temp_extract target_dir.txt *.zip
 
     - name: Build Mod File
       uses: geode-sdk/build-geode-mod@main
+      with:
+        target: iOS
