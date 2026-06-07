@@ -1,0 +1,48 @@
+name: Build Free Multiplayer Mod
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Download Clean Mod Source
+      run: |
+        git clone https://github.com .
+        
+    - name: Target Game Version
+      run: |
+        # This completely rewrites the versions to match your game version
+        sed -i '' 's/"win": "[^"]*"/"win": "2.2081"/g' mod.json
+        sed -i '' 's/"android": "[^"]*"/"android": "2.2081"/g' mod.json
+        sed -i '' 's/"mac": "[^"]*"/"mac": "2.2081"/g' mod.json
+        sed -i '' 's/"ios": "[^"]*"/"ios": "2.2081"/g' mod.json
+
+    - name: Build Mod File
+      uses: geode-sdk/build-geode-mod@main
+      with:
+        target: iOS
+
+    - name: Apply Apple Ad-Hoc Code Signature
+      run: |
+        # This fixes the unsigned error by forcing an iOS signature profile
+        mkdir temp_sign
+        unzip -q *.geode -d temp_sign
+        codesign -s - --force --deep temp_sign/*.dylib
+        cd temp_sign
+        zip -q -r ../free-multiplayer-ios.geode *
+        cd ..
+        rm -rf temp_sign *.geode
+
+    - name: Upload Signed File Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Signed-iOS-Mod
+        path: free-multiplayer-ios.geode
